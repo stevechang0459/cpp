@@ -2,9 +2,9 @@
 # Makefile created by Steve Chang
 # Date modified: 2025.06.01
 
-OBJS = $(addprefix $(OBJDIR)/,$(SRCS:.cpp=.o))
-ASMS = $(addprefix $(ASMDIR)/,$(SRCS:.cpp=.s))
-DEPS = $(addprefix $(OBJDIR)/,$(SRCS:.cpp=.cpp.d))
+OBJS = $(addprefix $(OBJDIR)/,$(SRCS:.$(C_FILE_EXT)=.o))
+ASMS = $(addprefix $(ASMDIR)/,$(SRCS:.$(C_FILE_EXT)=.s))
+DEPS = $(addprefix $(OBJDIR)/,$(SRCS:.$(C_FILE_EXT)=.$(C_FILE_EXT).d))
 
 # C_INCDIRS = $(foreach dir,$(MODULE_INCLUDES),$(PROJDIR)/$(dir))
 
@@ -13,7 +13,7 @@ CFLAGS = \
 	$(addprefix -I,$(COMMON_INCLUDE)) \
 	$(addprefix -I,$(EXTERN_INCLUDE)) \
 	$(foreach include, . $(INCLUDE), -I$(SRCDIR)/$(include)) \
-	-g -O2 -Wall -Werror
+	-g -O0 -Wall -Werror -fverbose-asm
 # -g -Os -Wall
 # -g -Wall
 
@@ -68,7 +68,7 @@ asmall: $(ASMS)
 
 $(ASMS): | $(ASMDIR)
 
-$(ASMDIR)/%.s : %.cpp
+$(ASMDIR)/%.s : %.$(C_FILE_EXT)
 	$(CC) $(DEFINES) $(CFLAGS) -c $< -S -o $@
 
 $(ASMDIR):

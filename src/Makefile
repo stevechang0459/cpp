@@ -10,7 +10,7 @@ SUBDIR =
 
 INCLUDE = \
 
-SRCS = $(wildcard *.cpp)
+SRCS = $(wildcard *.$(C_FILE_EXT))
 
 OBJDIR = obj
 

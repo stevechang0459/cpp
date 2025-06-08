@@ -21,21 +21,19 @@ SUBDIR = \
 COMMON_INCLUDE = \
 	$(CURDIR)/include \
 
-_BINNAME = cpp
+_BINNAME = cpp-test
 
 ifeq ($(OS),Windows_NT)
     OSFLAG += -DWIN32
+    BINNAME = $(_BINNAME).exe
     ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
         OSFLAG += -DAMD64
-		BINNAME = $(_BINNAME).exe
     else
         ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
             OSFLAG += -DAMD64
-			BINNAME = $(_BINNAME).exe
         endif
         ifeq ($(PROCESSOR_ARCHITECTURE),x86)
             OSFLAG += -DIA32
-			BINNAME = $(_BINNAME).exe
         endif
     endif
 else
@@ -51,15 +49,16 @@ else
     UNAME_P := $(shell uname -p)
     ifeq ($(UNAME_P),x86_64)
         OSFLAG += -DAMD64
-		BINNAME = $(_BINNAME)
     endif
     ifneq ($(filter %86,$(UNAME_P)),)
         OSFLAG += -DIA32
-		BINNAME = $(_BINNAME)
     endif
     ifneq ($(filter arm%,$(UNAME_P)),)
         OSFLAG += -DARM
-		BINNAME = $(_BINNAME)
+    endif
+    UNAME_M := $(shell uname -m)
+    ifneq ($(filter aarch64%,$(UNAME_M)),)
+        OSFLAG += -DARM
     endif
 endif
 
@@ -88,6 +87,14 @@ LIBS = \
 
 LDLIBS = $(foreach lib,$(LIBS),-l$(lib)) -lm # -lpthread	# <-- Do not change this order.
 
+ifeq ($(CC),gcc)
+C_FILE_EXT   = c
+CPP_FILE_EXT = cpp
+else
+C_FILE_EXT   = cpp
+CPP_FILE_EXT = cpp
+endif
+
 export BINNAME
 export PROJDIR
 export SRCDIR
@@ -99,6 +106,7 @@ export EXTERN_INCLUDE
 export CC AR
 export MAKE_RULES
 export OSFLAG
+export C_FILE_EXT
 
 .PHONY: all
 all:
@@ -115,7 +123,7 @@ all:
 
 .PHONY: clean
 clean:
-	rm -f $(BINDIR)/$(BINNAME)
+	rm -f $(BINDIR)/*
 	rm -f $(LIBDIR)/*
 	for dir in $(SUBDIR); do \
 		cd $$dir; \
@@ -173,4 +181,5 @@ depclean:
 
 .PHONY: format
 format:
-	$(CURDIR)/Astyle/bin/astyle.exe --options=$(CURDIR)/_astylerc -I -R ./*.cpp,*.c,*.h --exclude=AStyle --formatted
+	find $(CURDIR) -type f -exec dos2unix {} \;
+	$(CURDIR)/Astyle/bin/astyle.exe --options=$(CURDIR)/_astylerc -I -R ./*.$(C_FILE_EXT),*.$(CPP_FILE_EXT),*.h --exclude=AStyle --formatted
